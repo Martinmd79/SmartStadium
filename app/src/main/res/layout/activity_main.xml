@@ -242,6 +242,7 @@
 
             <!-- Power & Energy Management Card -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardPowerManagement"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -253,17 +254,17 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="20dp"
-                    android:gravity="center_vertical">
+                    android:padding="20dp">
 
                     <ImageView
                         android:layout_width="56dp"
                         android:layout_height="56dp"
-                        android:src="@drawable/ic_power"
                         android:layout_marginEnd="20dp"
                         android:background="@drawable/circle_background_orange"
-                        android:padding="12dp" />
+                        android:padding="12dp"
+                        android:src="@drawable/ic_power" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -274,17 +275,17 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="Power &amp; Energy Management"
+                                android:textColor="#333333"
                                 android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:textColor="#333333" />
+                                android:textStyle="bold" />
 
                             <Switch
                                 android:layout_width="wrap_content"
@@ -298,18 +299,18 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
                             android:text="Solar: 78% • Grid: 22%"
-                            android:textSize="14sp"
                             android:textColor="#666666"
-                            android:layout_marginTop="6dp" />
+                            android:textSize="14sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
                             android:text="Status: All systems operational"
-                            android:textSize="12sp"
                             android:textColor="#4caf50"
-                            android:layout_marginTop="4dp" />
+                            android:textSize="12sp" />
 
                     </LinearLayout>
 
@@ -586,6 +587,8 @@
             android:textStyle="bold"
             android:textSize="12sp"
             android:background="@drawable/button_outline_blue"
+            app:backgroundTint="@null"
+
             android:layout_marginEnd="8dp"
             android:stateListAnimator="@null"
             style="?android:attr/borderlessButtonStyle" />
@@ -598,6 +601,8 @@
             android:text="EMERGENCY OVERRIDE"
             android:textColor="#ffffff"
             android:textStyle="bold"
+            app:backgroundTint="@null"
+
             android:textSize="12sp"
             android:background="@drawable/button_filled_red"
             android:layout_marginStart="8dp"
