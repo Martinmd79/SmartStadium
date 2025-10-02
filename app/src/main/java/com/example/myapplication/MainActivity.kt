@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ADD THIS METHOD
+
     private fun showPowerManagementDialog() {
         // Create dialog
         val dialog = Dialog(this)
@@ -44,10 +44,7 @@ class MainActivity : AppCompatActivity() {
         // Find views in dialog
         val btnClose = dialog.findViewById<ImageView>(R.id.btnClose)
         val btnViewCharts = dialog.findViewById<MaterialButton>(R.id.btnViewCharts)
-        val btnMaxSolar = dialog.findViewById<MaterialButton>(R.id.btnMaxSolar)
-        val btnGridPriority = dialog.findViewById<MaterialButton>(R.id.btnGridPriority)
-        val btnPowerSave = dialog.findViewById<MaterialButton>(R.id.btnPowerSave)
-        val btnResetAuto = dialog.findViewById<MaterialButton>(R.id.btnResetAuto)
+
         val btnCancel = dialog.findViewById<MaterialButton>(R.id.btnCancel)
         val btnSave = dialog.findViewById<MaterialButton>(R.id.btnSave)
 
@@ -59,22 +56,6 @@ class MainActivity : AppCompatActivity() {
         btnViewCharts.setOnClickListener {
             // TODO: Open charts activity
             Toast.makeText(this, "Opening Charts...", Toast.LENGTH_SHORT).show()
-        }
-
-        btnMaxSolar.setOnClickListener {
-            Toast.makeText(this, "Max Solar Mode Activated", Toast.LENGTH_SHORT).show()
-        }
-
-        btnGridPriority.setOnClickListener {
-            Toast.makeText(this, "Grid Priority Mode Activated", Toast.LENGTH_SHORT).show()
-        }
-
-        btnPowerSave.setOnClickListener {
-            Toast.makeText(this, "Power Save Mode Activated", Toast.LENGTH_SHORT).show()
-        }
-
-        btnResetAuto.setOnClickListener {
-            Toast.makeText(this, "Auto Mode Restored", Toast.LENGTH_SHORT).show()
         }
 
         btnCancel.setOnClickListener {
