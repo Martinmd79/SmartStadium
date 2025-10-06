@@ -6,12 +6,16 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.R
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var cardPowerManagement: CardView
+
+    private val influxDB = InfluxDBManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +28,10 @@ class MainActivity : AppCompatActivity() {
         cardPowerManagement.setOnClickListener {
             showPowerManagementDialog()
         }
+
+
+        testInfluxDB()
+
     }
 
 
@@ -52,22 +60,32 @@ class MainActivity : AppCompatActivity() {
         btnClose.setOnClickListener {
             dialog.dismiss()
         }
-
         btnViewCharts.setOnClickListener {
-            // TODO: Open charts activity
             Toast.makeText(this, "Opening Charts...", Toast.LENGTH_SHORT).show()
         }
-
         btnCancel.setOnClickListener {
             dialog.dismiss()
         }
-
         btnSave.setOnClickListener {
             Toast.makeText(this, "Changes Saved!", Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
-
         // Show the dialog
         dialog.show()
     }
+
+    private fun testInfluxDB() {
+        lifecycleScope.launch {
+            Toast.makeText(this@MainActivity, "Testing InfluxDB...", Toast.LENGTH_SHORT).show()
+
+            val success = influxDB.testConnection()
+
+            if (success) {
+                Toast.makeText(this@MainActivity, "✓ Connected!", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this@MainActivity, "✗ Failed - Check Logcat", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 }
+
