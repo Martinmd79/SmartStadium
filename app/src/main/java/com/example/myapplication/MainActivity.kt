@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
             showPowerManagementDialog()
         }
 
-
         testInfluxDB()
 
     }
@@ -85,6 +84,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this@MainActivity, "✗ Failed - Check Logcat", Toast.LENGTH_LONG).show()
             }
+
         }
     }
 }

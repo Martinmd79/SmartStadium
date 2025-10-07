@@ -12,16 +12,14 @@ class InfluxDBManager {
         private const val TAG = "InfluxDB"
     }
 
-    // Get these from your teammate
-    private val token = "PASTE_TOKEN_HERE"
-    private val org = "PASTE_ORG_HERE"
-    private val bucket = "PASTE_BUCKET_HERE"
-    private val url = "http://PASTE_TAILSCALE_IP_HERE:8086"
+    private val url = "http://100.112.215.22:8086"     // Use the Tailscale IP, NOT 192.168.0.12
+    private val token = "XFBK3_Qax-C1GTMMXOtpuXWquWcKUsFGK6MlyRHupX6A6K2fO-oaUtH_8AFni1UWaK-9GPt0TX-HcTi6OCqK8Q=="
+    private val org = "Group-3.5"
+    private val bucket = "Smart-Stadium"
 
     private val client: InfluxDBClient by lazy {
         InfluxDBClientFactory.create(url, token.toCharArray(), org, bucket)
     }
-
     // Single test function
     suspend fun testConnection(): Boolean {
         return withContext(Dispatchers.IO) {
