@@ -405,6 +405,7 @@
 
             <!-- Mechanical Roof System Card -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardMechanicalRoof"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -486,6 +487,7 @@
 
             <!-- Lighting Control System Card -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardLightingControl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
