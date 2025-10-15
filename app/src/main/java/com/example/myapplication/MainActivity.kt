@@ -30,6 +30,29 @@ class MainActivity : AppCompatActivity() {
     // Sensor data storage
     private var sensorData = mutableMapOf<String, Double>()
 
+    // Pattern name mapping (user sees 1-12, but we send 3-14 to Pi)
+    // Pattern 1 & 2 (All Off/On) are hidden - only controlled by toggle switch
+    private val patternNames = mapOf(
+        1 to "Chase",           // User 1 = Pi 3
+        2 to "Reverse Chase",   // User 2 = Pi 4
+        3 to "Blink",           // User 3 = Pi 5
+        4 to "Random Sparkle",  // User 4 = Pi 6
+        5 to "Half Half",       // User 5 = Pi 7
+        6 to "Breathing",       // User 6 = Pi 8
+        7 to "Alternate",       // User 7 = Pi 9
+        8 to "Wave",            // User 8 = Pi 10
+        9 to "Fill",            // User 9 = Pi 11
+        10 to "Group Flash",    // User 10 = Pi 12
+        11 to "Fade Wave",      // User 11 = Pi 13
+        12 to "Party"           // User 12 = Pi 14
+    )
+
+    // Convert user-facing pattern number to actual Pi pattern number
+    private fun userPatternToPi(userPattern: Int): Int = userPattern + 2
+
+    // Convert Pi pattern number to user-facing pattern number
+    private fun piPatternToUser(piPattern: Int): Int = piPattern - 2
+
     // Roof state enum
     private enum class RoofState {
         OPEN, CLOSED, OPENING, CLOSING, STOPPED
@@ -239,16 +262,25 @@ class MainActivity : AppCompatActivity() {
                 roofState = RoofState.OPENING
                 updateRoofDisplay()
 
-                // Simulate roof opening (3 seconds)
+                Toast.makeText(this, "Opening roof...", Toast.LENGTH_SHORT).show()
+
+                // Send command to Raspberry Pi
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(3000)
-                    if (roofState == RoofState.OPENING) {
-                        roofState = RoofState.OPEN
+                    val result = Api.openRoof()
+                    result.onSuccess {
+                        // Simulate roof opening (3 seconds)
+                        kotlinx.coroutines.delay(3000)
+                        if (roofState == RoofState.OPENING) {
+                            roofState = RoofState.OPEN
+                            updateRoofDisplay()
+                            Toast.makeText(this@MainActivity, "✓ Roof fully opened!", Toast.LENGTH_SHORT).show()
+                        }
+                    }.onFailure { e ->
+                        roofState = targetRoofState
                         updateRoofDisplay()
-                        Toast.makeText(this@MainActivity, "Roof fully opened!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "✗ Failed to open roof: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
-                Toast.makeText(this, "Opening roof...", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Roof is already open or opening", Toast.LENGTH_SHORT).show()
             }
@@ -260,16 +292,25 @@ class MainActivity : AppCompatActivity() {
                 roofState = RoofState.CLOSING
                 updateRoofDisplay()
 
-                // Simulate roof closing (3 seconds)
+                Toast.makeText(this, "Closing roof...", Toast.LENGTH_SHORT).show()
+
+                // Send command to Raspberry Pi
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(3000)
-                    if (roofState == RoofState.CLOSING) {
-                        roofState = RoofState.CLOSED
+                    val result = Api.closeRoof()
+                    result.onSuccess {
+                        // Simulate roof closing (3 seconds)
+                        kotlinx.coroutines.delay(3000)
+                        if (roofState == RoofState.CLOSING) {
+                            roofState = RoofState.CLOSED
+                            updateRoofDisplay()
+                            Toast.makeText(this@MainActivity, "✓ Roof fully closed!", Toast.LENGTH_SHORT).show()
+                        }
+                    }.onFailure { e ->
+                        roofState = targetRoofState
                         updateRoofDisplay()
-                        Toast.makeText(this@MainActivity, "Roof fully closed!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "✗ Failed to close roof: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
-                Toast.makeText(this, "Closing roof...", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Roof is already closed or closing", Toast.LENGTH_SHORT).show()
             }
@@ -341,8 +382,8 @@ class MainActivity : AppCompatActivity() {
         val btnApplyPattern = dialog.findViewById<MaterialButton>(R.id.btnApplyPattern)
         val chipGroupActivePatterns = dialog.findViewById<ChipGroup>(R.id.chipGroupActivePatterns)
         val txtNoPatterns = dialog.findViewById<TextView>(R.id.txtNoPatterns)
-        val btnStandardMode = dialog.findViewById<MaterialButton>(R.id.btnStandardMode)
-        val btnEventMode = dialog.findViewById<MaterialButton>(R.id.btnEventMode)
+        val btnPartyMode = dialog.findViewById<MaterialButton>(R.id.btnPartyMode)
+        val btnChaseMode = dialog.findViewById<MaterialButton>(R.id.btnChaseMode)
         val btnAllPatterns = dialog.findViewById<MaterialButton>(R.id.btnAllPatterns)
         val btnCancelLighting = dialog.findViewById<MaterialButton>(R.id.btnCancelLighting)
         val btnSaveLighting = dialog.findViewById<MaterialButton>(R.id.btnSaveLighting)
@@ -359,14 +400,15 @@ class MainActivity : AppCompatActivity() {
                 txtNoPatterns.visibility = TextView.GONE
                 chipGroupActivePatterns.visibility = ChipGroup.VISIBLE
 
-                activePatterns.sorted().forEach { pattern ->
+                activePatterns.sorted().forEach { userPattern ->
                     val chip = Chip(this).apply {
-                        text = pattern.toString()
+                        // Show user-facing pattern number and name
+                        text = "$userPattern: ${patternNames[userPattern] ?: "Unknown"}"
                         isCloseIconVisible = true
                         setChipBackgroundColorResource(android.R.color.holo_orange_light)
                         setTextColor(resources.getColor(android.R.color.white, null))
                         setOnCloseIconClickListener {
-                            activePatterns.remove(pattern)
+                            activePatterns.remove(userPattern)
                             updateChips()
                             editTextPattern.setText(activePatterns.sorted().joinToString(","))
                         }
@@ -376,9 +418,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        activePatterns.addAll(listOf(1, 3, 5, 7))
+        // Initialize with default pattern (User sees 12:Party, sends Pi pattern 14)
+        activePatterns.add(12)
         updateChips()
-        editTextPattern.setText("1,3,5,7")
+        editTextPattern.setText("12")
 
         btnCloseLighting.setOnClickListener { dialog.dismiss() }
 
@@ -392,7 +435,21 @@ class MainActivity : AppCompatActivity() {
                 "Status: ON • All zones operational"
             else
                 "Status: OFF"
-            Toast.makeText(this, "Outside lights ${if (isChecked) "ON" else "OFF"}", Toast.LENGTH_SHORT).show()
+
+            // Send pattern 2 (ON) or pattern 1 (OFF) to Raspberry Pi
+            lifecycleScope.launch {
+                val pattern = if (isChecked) 2 else 1
+                val result = Api.applyPattern(listOf(pattern))
+
+                result.onSuccess {
+                    val status = if (isChecked) "ON" else "OFF"
+                    Toast.makeText(this@MainActivity, "✓ Outside lights $status", Toast.LENGTH_SHORT).show()
+                }.onFailure { e ->
+                    Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    // Revert switch on failure
+                    switchOutsideLights.isChecked = !isChecked
+                }
+            }
         }
 
         btnApplyPattern.setOnClickListener {
@@ -418,34 +475,87 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        btnStandardMode.setOnClickListener {
+        btnPartyMode.setOnClickListener {
+            // Pattern 14 = party in Python script
             activePatterns.clear()
-            activePatterns.addAll(listOf(1, 2))
+            activePatterns.add(14)
             updateChips()
-            editTextPattern.setText("1,2")
-            Toast.makeText(this, "Standard mode activated", Toast.LENGTH_SHORT).show()
+            editTextPattern.setText("14")
+
+            // Send immediately to Raspberry Pi: http://100.112.215.22:8001/hook?n=14
+            lifecycleScope.launch {
+                val result = Api.applyPattern(listOf(14))
+                result.onSuccess {
+                    Toast.makeText(this@MainActivity, "✓ Party mode activated!", Toast.LENGTH_SHORT).show()
+                }.onFailure { e ->
+                    Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
-        btnEventMode.setOnClickListener {
+        btnChaseMode.setOnClickListener {
+            // Pattern 3 = chase in Python script
             activePatterns.clear()
-            activePatterns.addAll(listOf(3, 5, 8))
+            activePatterns.add(3)
             updateChips()
-            editTextPattern.setText("3,5,8")
-            Toast.makeText(this, "Event mode activated", Toast.LENGTH_SHORT).show()
+            editTextPattern.setText("3")
+
+            // Send immediately to Raspberry Pi: http://100.112.215.22:8001/hook?n=3
+            lifecycleScope.launch {
+                val result = Api.applyPattern(listOf(3))
+                result.onSuccess {
+                    Toast.makeText(this@MainActivity, "✓ Chase mode activated!", Toast.LENGTH_SHORT).show()
+                }.onFailure { e ->
+                    Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         btnAllPatterns.setOnClickListener {
             activePatterns.clear()
-            activePatterns.addAll(1..14)
+            activePatterns.addAll(1..12)
             updateChips()
-            editTextPattern.setText((1..14).joinToString(","))
-            Toast.makeText(this, "All patterns activated", Toast.LENGTH_SHORT).show()
+            editTextPattern.setText((1..12).joinToString(","))
+            Toast.makeText(this, "All patterns activated (1-14)", Toast.LENGTH_SHORT).show()
         }
 
         btnCancelLighting.setOnClickListener { dialog.dismiss() }
+
         btnSaveLighting.setOnClickListener {
-            Toast.makeText(this, "Lighting settings saved!", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
+            if (activePatterns.isEmpty()) {
+                Toast.makeText(this, "No patterns selected", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Convert user patterns to Pi patterns (add 2 to each)
+            // Example: User patterns [1,3,5] become Pi patterns [3,5,7]
+            val piPatterns = activePatterns.map { userPatternToPi(it) }
+
+            // Send to Raspberry Pi
+            // Example: patterns 1,3,5 will ping http://100.112.215.22:8001/hook?n=3,5,7
+            lifecycleScope.launch {
+                Toast.makeText(this@MainActivity, "Sending patterns...", Toast.LENGTH_SHORT).show()
+
+                val result = Api.applyPattern(piPatterns)
+
+                result.onSuccess {
+                    val patternNamesList = activePatterns.sorted().map {
+                        "${it}: ${patternNames[it]}"
+                    }.joinToString(", ")
+                    Toast.makeText(
+                        this@MainActivity,
+                        "✓ Patterns activated: $patternNamesList",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    dialog.dismiss()
+                }.onFailure { e ->
+                    Toast.makeText(
+                        this@MainActivity,
+                        "✗ Failed to send patterns: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
 
         dialog.show()

@@ -27,14 +27,18 @@ object Api {
         }
     }
 
+    // ROOF CONTROL METHODS
     suspend fun openRoof(): Result<String> = get("$BASER/open")
-    suspend fun closeRoof(): Result<String> = get("$BASER/close") // if implemented
+    suspend fun closeRoof(): Result<String> = get("$BASER/close")
 
+    // ADD THESE TWO NEW METHODS for Stop and Resume:
+    suspend fun stopRoof(): Result<String> = get("$BASER/stop")
+    suspend fun resumeRoof(): Result<String> = get("$BASER/resume")
+
+    // LED PATTERN CONTROL
     suspend fun applyPattern(patterns: List<Int>): Result<String> {
         val n = patterns.joinToString(",")
         val encoded = URLEncoder.encode(n, "UTF-8")
         return get("$BASEOL/hook?n=$encoded")
     }
-
-    // suspend fun raw(pathAndQuery: String) = get("$BASE$pathAndQuery")
 }
