@@ -49,6 +49,29 @@ class InfluxDBManager {
             }
         }
     }
+    // In InfluxDBManager.kt
+    suspend fun latestFields(measurement: String, fields: List<String>): Map<String, Double> =
+        withContext(Dispatchers.IO) {
+            val flux = """
+            import "influxdata/influxdb/schema"
+            from(bucket: "$bucket")
+              |> range(start: -30m)
+              |> filter(fn: (r) => r._measurement == "$measurement" and contains(value: r._field, set: ${fields.joinToString(prefix="[\"", separator="\",\"", postfix="\"]")}))
+              |> last()
+        """.trimIndent()
+            val out = mutableMapOf<String, Double>()
+            try {
+                client.queryApi.query(flux, org).forEach { table ->
+                    table.records.forEach { rec ->
+                        val field = rec.field
+                        val value = (rec.value as? Number)?.toDouble()
+                        if (field != null && value != null) out[field] = value
+                    }
+                }
+            } catch (_: Exception) {}
+            out
+        }
+
 
     fun close() {
         client.close()

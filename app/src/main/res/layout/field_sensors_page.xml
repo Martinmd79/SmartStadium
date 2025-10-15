@@ -109,13 +109,6 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="10sp"
-                            android:textColor="#00838f"
-                            android:layout_marginBottom="12dp" />
 
                         <!-- Circular Progress Indicator -->
                         <FrameLayout
@@ -208,13 +201,6 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="10sp"
-                            android:textColor="#7b1fa2"
-                            android:layout_marginBottom="12dp" />
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -315,13 +301,7 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="10sp"
-                            android:textColor="#388e3c"
-                            android:layout_marginBottom="12dp" />
+
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -413,13 +393,7 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="10sp"
-                            android:textColor="#fbc02d"
-                            android:layout_marginBottom="12dp" />
+
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -520,13 +494,7 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="10sp"
-                            android:textColor="#0288d1"
-                            android:layout_marginBottom="12dp" />
+
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -618,13 +586,7 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="10sp"
-                            android:textColor="#1976d2"
-                            android:layout_marginBottom="12dp" />
+
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -722,13 +684,7 @@
 
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="10 minutes ago"
-                            android:textSize="11sp"
-                            android:textColor="#00695c"
-                            android:layout_marginTop="4dp" />
+
 
                     </LinearLayout>
 

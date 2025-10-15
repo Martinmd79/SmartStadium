@@ -25,6 +25,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cardLightingControl: CardView
     private lateinit var cardFieldSensors: CardView
 
+    // Track quick states for the dashboard
+    private var mainLightsOn = false      // inside lights (port 8003)
+    private var outsideLightsOn = false   // outside lights (basic on/off via patterns)
+
     private val influxDB = InfluxDBManager()
 
     // Sensor data storage
@@ -67,10 +71,33 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Find the cards
+        // Top-bar summary views
+        val txtTopInsideLights = findViewById<TextView>(R.id.txtTopInsideLights)
+        val txtTopOutsideLights = findViewById<TextView>(R.id.txtTopOutsideLights)
+        val txtTopRoof = findViewById<TextView>(R.id.txtTopRoof)
+
+        // Card summary lines
+        val txtCardFieldSensorsSummary = findViewById<TextView>(R.id.txtCardFieldSensorsSummary)
+        val txtCardRoofSummary = findViewById<TextView>(R.id.txtCardRoofSummary)
+        val txtCardLightingSummary = findViewById<TextView>(R.id.txtCardLightingSummary)
+
         cardPowerManagement = findViewById(R.id.cardPowerManagement)
         cardMechanicalRoof = findViewById(R.id.cardMechanicalRoof)
         cardLightingControl = findViewById(R.id.cardLightingControl)
         cardFieldSensors = findViewById(R.id.cardFieldSensors)
+
+        // --- INITIALIZE the top bar and card summaries so home shows a state immediately ---
+        txtTopInsideLights?.text = if (mainLightsOn) "ON" else "OFF"
+        txtTopOutsideLights?.text = if (outsideLightsOn) "ON" else "OFF"
+        txtTopRoof?.text = when (roofState) {
+            RoofState.OPEN -> "OPEN"
+            RoofState.CLOSED -> "CLOSED"
+            RoofState.OPENING -> "OPENING"
+            RoofState.CLOSING -> "CLOSING"
+            RoofState.STOPPED -> "STOPPED"
+        }
+        txtCardLightingSummary?.text = "Status: Inside: ${if (mainLightsOn) "ON" else "OFF"} • Outside: ${if (outsideLightsOn) "ON" else "OFF"}"
+        // Leave Field Sensors and Roof summaries as they are in XML until dialogs/sensors update them.
 
         // Set click listeners
         cardPowerManagement.setOnClickListener {
@@ -228,12 +255,12 @@ class MainActivity : AppCompatActivity() {
         // Function to update auto mode display
         fun updateAutoModeDisplay(isEnabled: Boolean) {
             if (isEnabled) {
-                txtHeaderAutoMode.text = "● AUTO MODE ACTIVE"
+                txtHeaderAutoMode.text = "● MANUAL MODE ACTIVE"
                 txtAutoModeStatus.text = "ENABLED"
                 txtAutoModeStatus.setTextColor(resources.getColor(android.R.color.holo_green_dark, null))
                 cardManualOverride.visibility = View.VISIBLE
             } else {
-                txtHeaderAutoMode.text = "● MANUAL MODE"
+                txtHeaderAutoMode.text = "● AUTO MODE"
                 txtAutoModeStatus.text = "DISABLED"
                 txtAutoModeStatus.setTextColor(resources.getColor(android.R.color.holo_red_light, null))
                 cardManualOverride.visibility = View.GONE
@@ -274,6 +301,8 @@ class MainActivity : AppCompatActivity() {
                             roofState = RoofState.OPEN
                             updateRoofDisplay()
                             Toast.makeText(this@MainActivity, "✓ Roof fully opened!", Toast.LENGTH_SHORT).show()
+                            findViewById<TextView>(R.id.txtTopRoof).text = "OPEN"
+                            findViewById<TextView>(R.id.txtCardRoofSummary)?.text = "Position: 100% Open • Bright light detected"
                         }
                     }.onFailure { e ->
                         roofState = targetRoofState
@@ -304,6 +333,8 @@ class MainActivity : AppCompatActivity() {
                             roofState = RoofState.CLOSED
                             updateRoofDisplay()
                             Toast.makeText(this@MainActivity, "✓ Roof fully closed!", Toast.LENGTH_SHORT).show()
+                            findViewById<TextView>(R.id.txtTopRoof).text = "CLOSED"
+                            findViewById<TextView>(R.id.txtCardRoofSummary)?.text = "Position: 0% Open • Low light detected"
                         }
                     }.onFailure { e ->
                         roofState = targetRoofState
@@ -318,9 +349,25 @@ class MainActivity : AppCompatActivity() {
 
         btnStop.setOnClickListener {
             if (roofState == RoofState.OPENING || roofState == RoofState.CLOSING) {
+                // Immediately reflect intent in UI
                 roofState = RoofState.STOPPED
                 updateRoofDisplay()
-                Toast.makeText(this, "Roof movement stopped!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Stopping roof…", Toast.LENGTH_SHORT).show()
+
+                // Tell the Pi
+                lifecycleScope.launch {
+                    val result = Api.stopRoof()
+                    result.onSuccess {
+                        Toast.makeText(this@MainActivity, "✓ Roof stopped", Toast.LENGTH_SHORT).show()
+                        findViewById<TextView>(R.id.txtTopRoof).text = "STOPPED"
+                        findViewById<TextView>(R.id.txtCardRoofSummary)?.text = "Position: Stopped • Motion halted"
+                    }.onFailure { e ->
+                        // If stop failed, revert to previous motion so user knows it didn't take
+                        roofState = if (targetRoofState == RoofState.OPEN) RoofState.OPENING else RoofState.CLOSING
+                        updateRoofDisplay()
+                        Toast.makeText(this@MainActivity, "✗ Stop failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
             } else {
                 Toast.makeText(this, "Roof is not moving", Toast.LENGTH_SHORT).show()
             }
@@ -328,24 +375,28 @@ class MainActivity : AppCompatActivity() {
 
         btnResumeOperation.setOnClickListener {
             if (roofState == RoofState.STOPPED) {
-                // Resume to target state
-                roofState = if (targetRoofState == RoofState.OPEN) {
-                    RoofState.OPENING
-                } else {
-                    RoofState.CLOSING
-                }
+                // Resume toward the target (OPEN or CLOSED)
+                val resumingToOpen = (targetRoofState == RoofState.OPEN)
+                roofState = if (resumingToOpen) RoofState.OPENING else RoofState.CLOSING
                 updateRoofDisplay()
+                Toast.makeText(this, "Resuming operation…", Toast.LENGTH_SHORT).show()
 
-                Toast.makeText(this, "Resuming operation...", Toast.LENGTH_SHORT).show()
-
-                // Simulate completing the operation (2 seconds remaining)
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(2000)
-                    if (roofState == RoofState.OPENING || roofState == RoofState.CLOSING) {
-                        roofState = targetRoofState
+                    val result = Api.resumeRoof()
+                    result.onSuccess {
+                        // Optional: keep your simulation to complete after a short delay
+                        kotlinx.coroutines.delay(2000)
+                        if (roofState == RoofState.OPENING || roofState == RoofState.CLOSING) {
+                            roofState = targetRoofState
+                            updateRoofDisplay()
+                            val action = if (resumingToOpen) "opened" else "closed"
+                            Toast.makeText(this@MainActivity, "Roof $action!", Toast.LENGTH_SHORT).show()
+                        }
+                    }.onFailure { e ->
+                        // If resume failed, go back to STOPPED so user sees no motion
+                        roofState = RoofState.STOPPED
                         updateRoofDisplay()
-                        val action = if (targetRoofState == RoofState.OPEN) "opened" else "closed"
-                        Toast.makeText(this@MainActivity, "Roof $action!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity, "✗ Resume failed: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             } else {
@@ -418,6 +469,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        fun sendUserPatternsToPi(userPatterns: Set<Int>) {
+            if (userPatterns.isEmpty()) {
+                Toast.makeText(this, "No patterns selected", Toast.LENGTH_SHORT).show()
+                return
+            }
+            // Convert user-facing 1..12 → Pi 3..14
+            val piPatterns = userPatterns.map { userPatternToPi(it) }
+
+            lifecycleScope.launch {
+                Toast.makeText(this@MainActivity, "Sending patterns…", Toast.LENGTH_SHORT).show()
+                val result = Api.applyPattern(piPatterns)
+                result.onSuccess {
+                    val patternNamesList = userPatterns.sorted().map {
+                        "$it: ${patternNames[it] ?: "Unknown"}"
+                    }.joinToString(", ")
+                    Toast.makeText(this@MainActivity, "✓ Patterns activated: $patternNamesList", Toast.LENGTH_LONG).show()
+                }.onFailure { e ->
+                    Toast.makeText(this@MainActivity, "✗ Failed to send patterns: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
         // Initialize with default pattern (User sees 12:Party, sends Pi pattern 14)
         activePatterns.add(12)
         updateChips()
@@ -426,8 +499,35 @@ class MainActivity : AppCompatActivity() {
         btnCloseLighting.setOnClickListener { dialog.dismiss() }
 
         switchMainLights.setOnCheckedChangeListener { _, isChecked ->
+            // Optimistic UI
             txtMainLightStatus.text = if (isChecked) "Status: ON" else "Status: OFF"
-            Toast.makeText(this, "Main lights ${if (isChecked) "ON" else "OFF"}", Toast.LENGTH_SHORT).show()
+
+            lifecycleScope.launch {
+                val result = Api.setMainLights(isChecked)
+                result.onSuccess {
+                    // Update quick flags and home labels
+                    mainLightsOn = isChecked
+                    findViewById<TextView>(R.id.txtTopInsideLights)?.text = if (mainLightsOn) "ON" else "OFF"
+                    findViewById<TextView>(R.id.txtCardLightingSummary)?.text =
+                        "Status: Inside: " + (if (mainLightsOn) "ON" else "OFF") + " • Outside: " +
+                                (if (outsideLightsOn) "ON" else "OFF")
+
+                    Toast.makeText(
+                        this@MainActivity,
+                        if (isChecked) "✓ Main lights ON" else "✓ Main lights OFF",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }.onFailure { e ->
+                    // Revert UI on failure
+                    switchMainLights.isChecked = !isChecked
+                    txtMainLightStatus.text = if (!isChecked) "Status: ON" else "Status: OFF"
+                    Toast.makeText(
+                        this@MainActivity,
+                        "✗ Failed to set main lights: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
 
         switchOutsideLights.setOnCheckedChangeListener { _, isChecked ->
@@ -442,8 +542,12 @@ class MainActivity : AppCompatActivity() {
                 val result = Api.applyPattern(listOf(pattern))
 
                 result.onSuccess {
-                    val status = if (isChecked) "ON" else "OFF"
+                    outsideLightsOn = isChecked
+                    val status = if (outsideLightsOn) "ON" else "OFF"
                     Toast.makeText(this@MainActivity, "✓ Outside lights $status", Toast.LENGTH_SHORT).show()
+                    findViewById<TextView>(R.id.txtTopOutsideLights)?.text = status
+                    findViewById<TextView>(R.id.txtCardLightingSummary)?.text =
+                        "Status: Inside: " + (if (mainLightsOn) "ON" else "OFF") + " • Outside: " + status
                 }.onFailure { e ->
                     Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
                     // Revert switch on failure
@@ -466,49 +570,35 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
 
+                val activePatterns = mutableSetOf<Int>()
                 activePatterns.clear()
                 activePatterns.addAll(newPatterns)
                 updateChips()
-                Toast.makeText(this, "Pattern applied: ${activePatterns.sorted().joinToString(",")}", Toast.LENGTH_SHORT).show()
+
+                // 🔥 Send right away
+                sendUserPatternsToPi(activePatterns)
+
             } catch (e: Exception) {
                 Toast.makeText(this, "Invalid format. Use: 1,3,5 or 1-5", Toast.LENGTH_SHORT).show()
             }
         }
 
         btnPartyMode.setOnClickListener {
-            // Pattern 14 = party in Python script
+            // User 12 = Party → Pi 14
             activePatterns.clear()
-            activePatterns.add(14)
+            activePatterns.add(12)
             updateChips()
-            editTextPattern.setText("14")
-
-            // Send immediately to Raspberry Pi: http://100.112.215.22:8001/hook?n=14
-            lifecycleScope.launch {
-                val result = Api.applyPattern(listOf(14))
-                result.onSuccess {
-                    Toast.makeText(this@MainActivity, "✓ Party mode activated!", Toast.LENGTH_SHORT).show()
-                }.onFailure { e ->
-                    Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
+            editTextPattern.setText("12")
+            sendUserPatternsToPi(activePatterns)
         }
 
         btnChaseMode.setOnClickListener {
-            // Pattern 3 = chase in Python script
+            // User 1 = Chase → Pi 3
             activePatterns.clear()
-            activePatterns.add(3)
+            activePatterns.add(1)
             updateChips()
-            editTextPattern.setText("3")
-
-            // Send immediately to Raspberry Pi: http://100.112.215.22:8001/hook?n=3
-            lifecycleScope.launch {
-                val result = Api.applyPattern(listOf(3))
-                result.onSuccess {
-                    Toast.makeText(this@MainActivity, "✓ Chase mode activated!", Toast.LENGTH_SHORT).show()
-                }.onFailure { e ->
-                    Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
+            editTextPattern.setText("1")
+            sendUserPatternsToPi(activePatterns)
         }
 
         btnAllPatterns.setOnClickListener {
@@ -516,23 +606,22 @@ class MainActivity : AppCompatActivity() {
             activePatterns.addAll(1..12)
             updateChips()
             editTextPattern.setText((1..12).joinToString(","))
-            Toast.makeText(this, "All patterns activated (1-14)", Toast.LENGTH_SHORT).show()
+            // 🔥 Send right away
+            sendUserPatternsToPi(activePatterns)
         }
 
         btnCancelLighting.setOnClickListener { dialog.dismiss() }
 
         btnSaveLighting.setOnClickListener {
+            val activePatterns = mutableSetOf<Int>()
+            // No change from your logic below — but this path isn’t really needed anymore.
             if (activePatterns.isEmpty()) {
                 Toast.makeText(this, "No patterns selected", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Convert user patterns to Pi patterns (add 2 to each)
-            // Example: User patterns [1,3,5] become Pi patterns [3,5,7]
             val piPatterns = activePatterns.map { userPatternToPi(it) }
 
-            // Send to Raspberry Pi
-            // Example: patterns 1,3,5 will ping http://100.112.215.22:8001/hook?n=3,5,7
             lifecycleScope.launch {
                 Toast.makeText(this@MainActivity, "Sending patterns...", Toast.LENGTH_SHORT).show()
 
@@ -646,17 +735,10 @@ class MainActivity : AppCompatActivity() {
         fun fetchSensorData() {
             lifecycleScope.launch {
                 Toast.makeText(this@MainActivity, "Fetching sensor data...", Toast.LENGTH_SHORT).show()
-
-                // TODO: Replace with actual InfluxDB query
-                // For now, using mock data
-                sensorData["temperature_c"] = 24.36
-                sensorData["humidity_pct"] = 49.59
-                sensorData["soil_wet_pct"] = 33.1
-                sensorData["lux"] = 106.67
-                sensorData["om_cloud_cover"] = 70.0
-                sensorData["om_precipitation"] = 0.0
-                sensorData["rain_detection"] = 0.0
-
+                val fields = listOf("temperature_c","humidity_pct","soil_wet_pct","lux",
+                    "om_cloud_cover","om_precipitation","rain_detection")
+                val latest = influxDB.latestFields("Stadium-Env", fields) // your measurement
+                latest.forEach { (k,v) -> sensorData[k] = v }
                 updateSensorUI()
                 Toast.makeText(this@MainActivity, "Sensor data updated!", Toast.LENGTH_SHORT).show()
             }
