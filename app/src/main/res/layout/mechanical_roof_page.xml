@@ -34,6 +34,7 @@
                     android:textColor="#ffffff" />
 
                 <TextView
+                    android:id="@+id/txtHeaderAutoMode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="● AUTO MODE ACTIVE"
@@ -82,64 +83,90 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="#e3f2fd"
-                    android:padding="16dp"
-                    android:layout_marginBottom="16dp">
+                    android:padding="20dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Current Position"
+                        android:textSize="14sp"
+                        android:textColor="#1565c0"
+                        android:layout_marginBottom="12dp" />
+
+                    <TextView
+                        android:id="@+id/txtRoofPositionLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="OPEN"
+                        android:textSize="48sp"
+                        android:textStyle="bold"
+                        android:textColor="#1565c0" />
+
+                </LinearLayout>
+
+                <!-- Movement Status & Automation Mode -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#f5f5f5"
+                    android:padding="12dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:orientation="horizontal">
 
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Current Position"
-                            android:textSize="14sp"
-                            android:textColor="#1565c0" />
-
-
+                            android:text="Movement Status"
+                            android:textSize="13sp"
+                            android:textColor="#666666" />
 
                         <TextView
+                            android:id="@+id/txtMovementStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=" OPEN"
-                            android:textSize="22sp"
+                            android:text="STATIONARY"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="#1565c0"
-                            android:layout_marginStart="8dp" />
+                            android:textColor="#4caf50" />
 
                     </LinearLayout>
 
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#e0e0e0"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp" />
 
-
-                </LinearLayout>
-
-                <!-- Movement Status -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:background="#f5f5f5"
-                    android:padding="12dp">
-
-                    <TextView
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Movement Status"
-                        android:textSize="13sp"
-                        android:textColor="#666666" />
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/txtMovementStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="STATIONARY"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="#4caf50" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Automation Mode"
+                            android:textSize="13sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/txtAutoModeStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ENABLED"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#4caf50" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -147,82 +174,7 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- Manual Override Controls Section -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Manual Override Controls"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Control Buttons -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <!-- Open Fully Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnOpenFully"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:text="⬆ OPEN "
-                        android:textColor="#ffffff"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        app:backgroundTint="#4caf50"
-                        app:cornerRadius="8dp"
-                        android:layout_marginBottom="12dp" />
-
-                    <!-- Close Fully Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCloseFully"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:text="⬇ CLOSE "
-                        android:textColor="#ffffff"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        app:backgroundTint="#2196f3"
-                        app:cornerRadius="8dp"
-                        android:layout_marginBottom="12dp" />
-
-                    <!-- Stop Button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnStop"
-                        android:layout_width="match_parent"
-                        android:layout_height="60dp"
-                        android:text="⬛ STOP"
-                        android:textColor="#ffffff"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        app:backgroundTint="#f44336"
-                        app:cornerRadius="8dp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Automation Settings Section -->
+        <!-- Automation Settings Section (FIRST - Before Manual Controls) -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -278,6 +230,16 @@
                             android:textColor="#666666"
                             android:layout_marginTop="4dp" />
 
+                        <TextView
+                            android:id="@+id/txtAutoModeNote"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Enable to access manual override controls"
+                            android:textSize="11sp"
+                            android:textStyle="italic"
+                            android:textColor="#1565c0"
+                            android:layout_marginTop="4dp" />
+
                     </LinearLayout>
 
                     <androidx.appcompat.widget.SwitchCompat
@@ -286,6 +248,204 @@
                         android:layout_height="wrap_content"
                         android:checked="true"
                         android:layout_marginStart="16dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Manual Override Controls Section (Only visible when Auto Mode is ON) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardManualOverride"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Manual Override Controls"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚠ OVERRIDE"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="#ff9800"
+                        android:background="#fff3e0"
+                        android:padding="6dp" />
+
+                </LinearLayout>
+
+                <!-- Control Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Open Fully Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOpenFully"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="⬆ OPEN "
+                        android:textColor="#ffffff"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        app:backgroundTint="#4caf50"
+                        app:cornerRadius="8dp"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Close Fully Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCloseFully"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="⬇ CLOSE "
+                        android:textColor="#ffffff"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        app:backgroundTint="#2196f3"
+                        app:cornerRadius="8dp"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Stop & Resume Buttons Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Stop Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnStop"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_weight="1"
+                            android:text="⬛ STOP"
+                            android:textColor="#ffffff"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            app:backgroundTint="#f44336"
+                            app:cornerRadius="8dp"
+                            android:layout_marginEnd="8dp" />
+
+                        <!-- Resume Operation Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnResumeOperation"
+                            android:layout_width="0dp"
+                            android:layout_height="60dp"
+                            android:layout_weight="1"
+                            android:text="▶ RESUME"
+                            android:textColor="#ffffff"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            app:backgroundTint="#ff9800"
+                            app:cornerRadius="8dp"
+                            android:layout_marginStart="8dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- LED Control Status Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Interior LED Status"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="#fff8e1"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💡 Interior LEDs"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#f57c00" />
+
+                        <TextView
+                            android:id="@+id/txtLEDReason"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Auto-controlled by roof position &amp; light level"
+                            android:textSize="12sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtLEDStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="OFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#4caf50"
+                        android:background="#ffffff"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp" />
 
                 </LinearLayout>
 

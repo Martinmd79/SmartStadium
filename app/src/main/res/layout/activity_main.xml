@@ -106,12 +106,7 @@
                 android:textColor="#ff9800"
                 android:layout_marginTop="4dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Roof: Open"
-                android:textSize="10sp"
-                android:textColor="#666666" />
+
 
         </LinearLayout>
 
@@ -120,38 +115,7 @@
             android:layout_height="match_parent"
             android:background="#eeeeee" />
 
-        <!-- Power Status -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Solar Power"
-                android:textSize="12sp"
-                android:textColor="#666666" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="78%"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#ff9800"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="314kW Total"
-                android:textSize="10sp"
-                android:textColor="#666666" />
-
-        </LinearLayout>
 
         <View
             android:layout_width="1dp"
@@ -182,12 +146,7 @@
                 android:textColor="#4caf50"
                 android:layout_marginTop="4dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No irrigation"
-                android:textSize="10sp"
-                android:textColor="#666666" />
+
 
         </LinearLayout>
 
@@ -287,12 +246,7 @@
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
 
-                            <Switch
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:checked="true"
-                                android:text="AUTO"
-                                android:textSize="10sp" />
+
 
                         </LinearLayout>
 
@@ -324,6 +278,7 @@
 
             <!-- Field Sensors & IoT Network Card -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardFieldSensors"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -368,12 +323,7 @@
                                 android:textStyle="bold"
                                 android:textColor="#333333" />
 
-                            <Switch
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:checked="true"
-                                android:text="AUTO"
-                                android:textSize="10sp" />
+
 
                         </LinearLayout>
 
@@ -450,12 +400,7 @@
                                 android:textStyle="bold"
                                 android:textColor="#333333" />
 
-                            <Switch
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:checked="true"
-                                android:text="AUTO"
-                                android:textSize="10sp" />
+
 
                         </LinearLayout>
 
@@ -532,12 +477,7 @@
                                 android:textStyle="bold"
                                 android:textColor="#333333" />
 
-                            <Switch
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:checked="true"
-                                android:text="AUTO"
-                                android:textSize="10sp" />
+
 
                         </LinearLayout>
 
