@@ -153,7 +153,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Automation Mode"
+                            android:text="Manual Mode"
                             android:textSize="13sp"
                             android:textColor="#666666" />
 
@@ -217,7 +217,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Automatic Mode"
+                            android:text="Manual Mode"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="#2e7d32" />
@@ -225,7 +225,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="System controls roof based on light &amp; weather"
+                            android:text="System controls roof based on manual commands"
                             android:textSize="12sp"
                             android:textColor="#666666"
                             android:layout_marginTop="4dp" />
