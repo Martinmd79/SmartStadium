@@ -51,7 +51,7 @@ object Api {
         val n = patterns.joinToString(",")                    // e.g., 14,4,5
         return get("$BASEOL/hook?n=$n")                       // GET as your hook expects
     }
-    // ✅ Main lights: send 1 (off) or 2 (on) to :8003
+    // Main lights: send 1 (off) or 2 (on) to :8003
     suspend fun setMainLights(isOn: Boolean): Result<String> {
         val n = if (isOn) 2 else 1
         return get("$BASEML/hook?n=$n")

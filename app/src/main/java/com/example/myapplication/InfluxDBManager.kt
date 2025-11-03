@@ -26,7 +26,7 @@ class InfluxDBManager {
             try {
                 val query = """
                     from(bucket: "$bucket")
-                      |> range(start: -1h)
+                      |> range(start: -7d)
                       |> limit(n: 1)
                 """.trimIndent()
 
@@ -49,7 +49,7 @@ class InfluxDBManager {
             }
         }
     }
-    // In InfluxDBManager.kt
+
     suspend fun latestFields(measurement: String, fields: List<String>): Map<String, Double> =
         withContext(Dispatchers.IO) {
             val flux = """

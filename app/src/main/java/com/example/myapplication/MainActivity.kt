@@ -32,6 +32,9 @@ class MainActivity : AppCompatActivity() {
     private val influxDB = InfluxDBManager()
 
     // Sensor data storage
+
+    private val powerData = mutableMapOf<String, Double>()
+
     private var sensorData = mutableMapOf<String, Double>()
 
     // Pattern name mapping (user sees 1-12, but we send 3-14 to Pi)
@@ -130,17 +133,65 @@ class MainActivity : AppCompatActivity() {
         )
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        val btnClose = dialog.findViewById<ImageView>(R.id.btnClose)
-        val btnCancel = dialog.findViewById<MaterialButton>(R.id.btnCancel)
-        val btnSave = dialog.findViewById<MaterialButton>(R.id.btnSave)
+        val btnClosePower = dialog.findViewById<ImageView>(R.id.btnClosePower)
+        val btnClosePowerBottom = dialog.findViewById<MaterialButton>(R.id.btnClosePowerBottom)
+        val btnRefreshPower = dialog.findViewById<MaterialButton>(R.id.btnRefreshPower)
 
-        btnClose.setOnClickListener { dialog.dismiss() }
+// TextViews for gauge values
+        val txtCurrent = dialog.findViewById<TextView>(R.id.txtCurrent)
+        val txtLoadVoltage = dialog.findViewById<TextView>(R.id.txtLoadVoltage)
+        val txtPower = dialog.findViewById<TextView>(R.id.txtPower)
 
-        btnCancel.setOnClickListener { dialog.dismiss() }
-        btnSave.setOnClickListener {
-            Toast.makeText(this, "Changes Saved!", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
+// ProgressBars for gauges
+        val progressCurrent = dialog.findViewById<ProgressBar>(R.id.progressCurrent)
+        val progressLoadVoltage = dialog.findViewById<ProgressBar>(R.id.progressLoadVoltage)
+        val progressPower = dialog.findViewById<ProgressBar>(R.id.progressPower)
+
+        // Function to update UI with power data
+        fun updatePowerUI() {
+            // Current (0-10A max range)
+            val current = powerData["current"] ?: 0.0
+            txtCurrent.text = String.format("%.2f", current)
+            val currentPercent = ((current / 10.0) * 100).toInt().coerceIn(0, 100)
+            progressCurrent.progress = currentPercent
+
+            // Load Voltage (0-15V max range)
+            val loadVoltage = powerData["load_voltage"] ?: 0.0
+            txtLoadVoltage.text = String.format("%.2f", loadVoltage)
+            val voltagePercent = ((loadVoltage / 15.0) * 100).toInt().coerceIn(0, 100)
+            progressLoadVoltage.progress = voltagePercent
+
+            // Power (0-150W max range)
+            val power = powerData["power"] ?: 0.0
+            txtPower.text = String.format("%.2f", power)
+            val powerPercent = ((power / 150.0) * 100).toInt().coerceIn(0, 100)
+            progressPower.progress = powerPercent
         }
+
+        // Function to fetch power data from InfluxDB
+        fun fetchPowerData() {
+            lifecycleScope.launch {
+                Toast.makeText(this@MainActivity, "Fetching power data...", Toast.LENGTH_SHORT).show()
+                val fields = listOf("current", "load_voltage", "power")
+
+                // CHANGE "Power-System" to your actual InfluxDB measurement name
+                val latest = influxDB.latestFields("Power-System", fields)
+                latest.forEach { (k, v) -> powerData[k] = v }
+
+                updatePowerUI()
+                Toast.makeText(this@MainActivity, "Power data updated!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnClosePower.setOnClickListener { dialog.dismiss() }
+        btnClosePowerBottom.setOnClickListener { dialog.dismiss() }
+
+        btnRefreshPower.setOnClickListener {
+            fetchPowerData()
+        }
+
+// Fetch data when dialog opens
+        fetchPowerData()
 
         dialog.show()
     }
