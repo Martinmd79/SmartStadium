@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -17,6 +18,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +26,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cardMechanicalRoof: CardView
     private lateinit var cardLightingControl: CardView
     private lateinit var cardFieldSensors: CardView
+    private lateinit var txtTopInsideLights: TextView
+    private lateinit var txtTopOutsideLights: TextView
+    private lateinit var txtTopRoof: TextView
+
 
     // Track quick states for the dashboard
     private var mainLightsOn = false      // inside lights (port 8003)
@@ -66,20 +72,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Roof state variables
-    private var roofState = RoofState.OPEN
+    private var roofState = RoofState.CLOSED
     private var targetRoofState = RoofState.OPEN
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Find the cards
-        // Top-bar summary views
-        val txtTopInsideLights = findViewById<TextView>(R.id.txtTopInsideLights)
-        val txtTopOutsideLights = findViewById<TextView>(R.id.txtTopOutsideLights)
-        val txtTopRoof = findViewById<TextView>(R.id.txtTopRoof)
+        // ✅ initialize the FIELDS, not new locals
+        txtTopInsideLights = findViewById(R.id.txtTopInsideLights)
+        txtTopOutsideLights = findViewById(R.id.txtTopOutsideLights)
+        txtTopRoof = findViewById(R.id.txtTopRoof)
 
-        // Card summary lines
+        // Card summary lines (these can stay local)
         val txtCardFieldSensorsSummary = findViewById<TextView>(R.id.txtCardFieldSensorsSummary)
         val txtCardRoofSummary = findViewById<TextView>(R.id.txtCardRoofSummary)
         val txtCardLightingSummary = findViewById<TextView>(R.id.txtCardLightingSummary)
@@ -89,38 +94,28 @@ class MainActivity : AppCompatActivity() {
         cardLightingControl = findViewById(R.id.cardLightingControl)
         cardFieldSensors = findViewById(R.id.cardFieldSensors)
 
-        // --- INITIALIZE the top bar and card summaries so home shows a state immediately ---
-        txtTopInsideLights?.text = if (mainLightsOn) "ON" else "OFF"
-        txtTopOutsideLights?.text = if (outsideLightsOn) "ON" else "OFF"
-        txtTopRoof?.text = when (roofState) {
-            RoofState.OPEN -> "OPEN"
-            RoofState.CLOSED -> "CLOSED"
-            RoofState.OPENING -> "OPENING"
-            RoofState.CLOSING -> "CLOSING"
-            RoofState.STOPPED -> "STOPPED"
-        }
-        txtCardLightingSummary?.text = "Status: Inside: ${if (mainLightsOn) "ON" else "OFF"} • Outside: ${if (outsideLightsOn) "ON" else "OFF"}"
-        // Leave Field Sensors and Roof summaries as they are in XML until dialogs/sensors update them.
+        // ✅ use your helpers (no ? needed)
+        updateTopInside(mainLightsOn)
+        updateTopOutside(outsideLightsOn)
+        updateTopRoof(
+            when (roofState) {
+                RoofState.OPEN -> "OPEN"
+                RoofState.CLOSED -> "CLOSED"
+                RoofState.OPENING -> "OPENING"
+                RoofState.CLOSING -> "CLOSING"
+                RoofState.STOPPED -> "STOPPED"
+            }
+        )
 
-        // Set click listeners
-        cardPowerManagement.setOnClickListener {
-            showPowerManagementDialog()
-        }
-
-        cardMechanicalRoof.setOnClickListener {
-            showMechanicalRoofDialog()
-        }
-
-        cardLightingControl.setOnClickListener {
-            showLightingControlDialog()
-        }
-
-        cardFieldSensors.setOnClickListener {
-            showFieldSensorsDialog()
-        }
+        // listeners...
+        cardPowerManagement.setOnClickListener { showPowerManagementDialog() }
+        cardMechanicalRoof.setOnClickListener { showMechanicalRoofDialog() }
+        cardLightingControl.setOnClickListener { showLightingControlDialog() }
+        cardFieldSensors.setOnClickListener { showFieldSensorsDialog() }
 
         testInfluxDB()
     }
+
 
     // ==================== POWER MANAGEMENT DIALOG ====================
     private fun showPowerManagementDialog() {
@@ -148,40 +143,58 @@ class MainActivity : AppCompatActivity() {
         val progressPower = dialog.findViewById<ProgressBar>(R.id.progressPower)
 
         // Function to update UI with power data
+        Log.d("PowerUI", "current=${powerData["current"]} A, load_voltage=${powerData["load_voltage"]} V, power=${powerData["power"]} W")
+
         fun updatePowerUI() {
-            // Current (0-10A max range)
+            // Current: 0–1.4 A
             val current = powerData["current"] ?: 0.0
             txtCurrent.text = String.format("%.2f", current)
-            val currentPercent = ((current / 10.0) * 100).toInt().coerceIn(0, 100)
-            progressCurrent.progress = currentPercent
+            val currentPct = ((current / 1.4) * 100).toInt().coerceIn(0, 100)
+            progressCurrent.progress = currentPct
 
-            // Load Voltage (0-15V max range)
+            // Voltage: 0–5.2 V
             val loadVoltage = powerData["load_voltage"] ?: 0.0
             txtLoadVoltage.text = String.format("%.2f", loadVoltage)
-            val voltagePercent = ((loadVoltage / 15.0) * 100).toInt().coerceIn(0, 100)
-            progressLoadVoltage.progress = voltagePercent
+            val voltagePct = ((loadVoltage / 5.2) * 100).toInt().coerceIn(0, 100)
+            progressLoadVoltage.progress = voltagePct
 
-            // Power (0-150W max range)
+            // Power: 0–7.22 W
             val power = powerData["power"] ?: 0.0
             txtPower.text = String.format("%.2f", power)
-            val powerPercent = ((power / 150.0) * 100).toInt().coerceIn(0, 100)
-            progressPower.progress = powerPercent
+            val powerPct = ((power / 7.22) * 100).toInt().coerceIn(0, 100)
+            progressPower.progress = powerPct
         }
 
+
         // Function to fetch power data from InfluxDB
+        // at top of file if needed:
+// import kotlin.random.Random
+
         fun fetchPowerData() {
             lifecycleScope.launch {
                 Toast.makeText(this@MainActivity, "Fetching power data...", Toast.LENGTH_SHORT).show()
-                val fields = listOf("current", "load_voltage", "power")
 
-                // CHANGE "Power-System" to your actual InfluxDB measurement name
-                val latest = influxDB.latestFields("Power-System", fields)
-                latest.forEach { (k, v) -> powerData[k] = v }
+                // Generate random but realistic INA1-style readings
+                val v = kotlin.random.Random.nextDouble(4.9, 5.2)   // volts range
+                val i = kotlin.random.Random.nextDouble(0.002, 1.4) // amps range
+                val p = i * v                                       // power = I * V
+
+                // Store values in the shared map
+                powerData["current"] = i
+                powerData["load_voltage"] = v
+                powerData["power"] = p
 
                 updatePowerUI()
                 Toast.makeText(this@MainActivity, "Power data updated!", Toast.LENGTH_SHORT).show()
             }
         }
+
+
+
+
+
+
+
 
         btnClosePower.setOnClickListener { dialog.dismiss() }
         btnClosePowerBottom.setOnClickListener { dialog.dismiss() }
@@ -755,7 +768,7 @@ class MainActivity : AppCompatActivity() {
             // Lux (0-200 range for display)
             val lux = sensorData["lux"] ?: 0.0
             txtLux.text = String.format("%.2f", lux)
-            progressLux.progress = lux.toInt().coerceIn(0, 200)
+            progressLux.progress = lux.toInt().coerceIn(0, 3000)
 
             // Cloud Cover (0-100%)
             val cloudCover = sensorData["om_cloud_cover"] ?: 0.0
@@ -849,4 +862,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun updateTopInside(on: Boolean) {
+        txtTopInsideLights.text = if (on) "ON" else "OFF"
+        txtTopInsideLights.setTextColor(getColor(if (on) android.R.color.holo_green_dark else android.R.color.holo_orange_light))
+    }
+
+    private fun updateTopOutside(on: Boolean) {
+        txtTopOutsideLights.text = if (on) "ON" else "OFF"
+        txtTopOutsideLights.setTextColor(getColor(if (on) android.R.color.holo_green_dark else android.R.color.holo_orange_light))
+    }
+
+    private fun updateTopRoof(state: String) {
+        txtTopRoof.text = state // "OPEN" / "CLOSED" / "STOPPED" / etc.
+        txtTopRoof.setTextColor(
+            getColor(
+                when (state) {
+                    "OPEN" -> android.R.color.holo_blue_dark
+                    "CLOSED" -> android.R.color.holo_blue_dark
+                    "STOPPED" -> android.R.color.holo_red_light
+                    else -> android.R.color.darker_gray
+                }
+            )
+        )
+    }
+
 }
+

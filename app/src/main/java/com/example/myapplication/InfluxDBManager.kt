@@ -73,6 +73,7 @@ class InfluxDBManager {
         }
 
 
+
     fun close() {
         client.close()
     }

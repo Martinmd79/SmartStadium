@@ -408,7 +408,7 @@
                                 android:layout_height="120dp"
                                 android:layout_gravity="center"
                                 android:indeterminate="false"
-                                android:max="200"
+                                android:max="3000"
                                 android:progress="107"
                                 android:progressDrawable="@drawable/circular_progress_yellow"
                                 android:rotation="-90" />
@@ -601,7 +601,7 @@
                                 android:layout_height="120dp"
                                 android:layout_gravity="center"
                                 android:indeterminate="false"
-                                android:max="10"
+                                android:max="20"
                                 android:progress="0"
                                 android:progressDrawable="@drawable/circular_progress_blue"
                                 android:rotation="-90" />
