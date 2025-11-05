@@ -74,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     // Roof state variables
     private var roofState = RoofState.CLOSED
     private var targetRoofState = RoofState.OPEN
+    private val lightingPrefs by lazy { getSharedPreferences("LightingPrefs", MODE_PRIVATE) }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -503,6 +505,20 @@ class MainActivity : AppCompatActivity() {
         val btnCancelLighting = dialog.findViewById<MaterialButton>(R.id.btnCancelLighting)
         val btnSaveLighting = dialog.findViewById<MaterialButton>(R.id.btnSaveLighting)
 
+        // Restore saved states (default = OFF for both)
+        val savedMain = lightingPrefs.getBoolean("mainLights", false)
+        val savedOutside = lightingPrefs.getBoolean("outsideLights", false)
+
+        switchMainLights.isChecked = savedMain
+        txtMainLightStatus.text = if (savedMain) "Status: ON" else "Status: OFF"
+
+        switchOutsideLights.isChecked = savedOutside
+        txtOutsideLightStatus.text = if (savedOutside)
+            "Status: ON • All zones operational"
+        else
+            "Status: OFF"
+
+
         val activePatterns = mutableSetOf<Int>()
 
         fun updateChips() {
@@ -576,6 +592,9 @@ class MainActivity : AppCompatActivity() {
                         "Status: Inside: " + (if (mainLightsOn) "ON" else "OFF") + " • Outside: " +
                                 (if (outsideLightsOn) "ON" else "OFF")
 
+                    // NEW: persist on success
+                    lightingPrefs.edit().putBoolean("mainLights", isChecked).apply()
+
                     Toast.makeText(
                         this@MainActivity,
                         if (isChecked) "✓ Main lights ON" else "✓ Main lights OFF",
@@ -585,6 +604,7 @@ class MainActivity : AppCompatActivity() {
                     // Revert UI on failure
                     switchMainLights.isChecked = !isChecked
                     txtMainLightStatus.text = if (!isChecked) "Status: ON" else "Status: OFF"
+                    // NOTE: no prefs write here (we only persist on success)
                     Toast.makeText(
                         this@MainActivity,
                         "✗ Failed to set main lights: ${e.message}",
@@ -600,7 +620,6 @@ class MainActivity : AppCompatActivity() {
             else
                 "Status: OFF"
 
-            // Send pattern 2 (ON) or pattern 1 (OFF) to Raspberry Pi
             lifecycleScope.launch {
                 val pattern = if (isChecked) 2 else 1
                 val result = Api.applyPattern(listOf(pattern))
@@ -612,13 +631,21 @@ class MainActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.txtTopOutsideLights)?.text = status
                     findViewById<TextView>(R.id.txtCardLightingSummary)?.text =
                         "Status: Inside: " + (if (mainLightsOn) "ON" else "OFF") + " • Outside: " + status
+
+                    // NEW: persist on success
+                    lightingPrefs.edit().putBoolean("outsideLights", isChecked).apply()
                 }.onFailure { e ->
                     Toast.makeText(this@MainActivity, "✗ Failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                    // Revert switch on failure
+                    // Revert switch on failure (no prefs write)
                     switchOutsideLights.isChecked = !isChecked
+                    txtOutsideLightStatus.text = if (!isChecked)
+                        "Status: ON • All zones operational"
+                    else
+                        "Status: OFF"
                 }
             }
         }
+
 
         btnApplyPattern.setOnClickListener {
             val input = editTextPattern.text.toString().trim()
@@ -638,6 +665,8 @@ class MainActivity : AppCompatActivity() {
                 activePatterns.clear()
                 activePatterns.addAll(newPatterns)
                 updateChips()
+                if (!switchOutsideLights.isChecked) switchOutsideLights.isChecked = true
+
 
                 // 🔥 Send right away
                 sendUserPatternsToPi(activePatterns)
@@ -653,6 +682,7 @@ class MainActivity : AppCompatActivity() {
             activePatterns.add(12)
             updateChips()
             editTextPattern.setText("12")
+            if (!switchOutsideLights.isChecked) switchOutsideLights.isChecked = true
             sendUserPatternsToPi(activePatterns)
         }
 
@@ -662,6 +692,7 @@ class MainActivity : AppCompatActivity() {
             activePatterns.add(1)
             updateChips()
             editTextPattern.setText("1")
+            if (!switchOutsideLights.isChecked) switchOutsideLights.isChecked = true
             sendUserPatternsToPi(activePatterns)
         }
 
@@ -670,6 +701,7 @@ class MainActivity : AppCompatActivity() {
             activePatterns.addAll(1..12)
             updateChips()
             editTextPattern.setText((1..12).joinToString(","))
+            if (!switchOutsideLights.isChecked) switchOutsideLights.isChecked = true
             // 🔥 Send right away
             sendUserPatternsToPi(activePatterns)
         }
@@ -683,6 +715,9 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "No patterns selected", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            if (!switchOutsideLights.isChecked) switchOutsideLights.isChecked = true
+
 
             val piPatterns = activePatterns.map { userPatternToPi(it) }
 
