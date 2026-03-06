@@ -1,4 +1,3 @@
-````markdown
 # Smart Stadium IoT Control System — Android + IoT Platform
 
 [![Platform](https://img.shields.io/badge/Platform-Android-3DDC84)](https://developer.android.com/)
@@ -61,7 +60,7 @@ This project demonstrates a full-stack architecture combining **mobile developme
 
 The system follows a **three-layer architecture** connecting mobile applications, backend services, and IoT devices.
 
-```mermaid
+
 flowchart LR
   A[Android Mobile App]
   B[FastAPI Backend Services]
@@ -74,70 +73,59 @@ flowchart LR
   C --> D
   C --> E
   A -->|Telemetry Query| E
-````
-
-### Architecture Components
-
-| Layer       | Responsibility                            |
-| ----------- | ----------------------------------------- |
-| Mobile App  | Control interface for stadium operators   |
-| Backend API | Handles control commands and system logic |
-| IoT Gateway | Communicates with sensors and devices     |
-| Database    | Stores telemetry and environmental data   |
-
----
-
-# Application Modules
+Architecture Components
+Layer	Responsibility
+Mobile App	Control interface for stadium operators
+Backend API	Handles control commands and system logic
+IoT Gateway	Communicates with sensors and devices
+Database	Stores telemetry and environmental data
+Application Modules
 
 The Android application is divided into modules representing different stadium systems.
 
-### Field Sensors
+Field Sensors
 
 Displays telemetry from environmental sensors deployed around the stadium.
 
 Examples:
 
-* Temperature monitoring
-* Humidity monitoring
-* Light sensor readings
+Temperature monitoring
 
----
+Humidity monitoring
 
-### Lighting Control
+Light sensor readings
+
+Lighting Control
 
 Allows operators to remotely manage stadium lighting.
 
 Functions include:
 
-* Turning lights on/off
-* Managing lighting zones
-* Monitoring system status
+Turning lights on/off
 
----
+Managing lighting zones
 
-### Mechanical Roof Control
+Monitoring system status
+
+Mechanical Roof Control
 
 Controls the stadium roof system.
 
 Operators can:
 
-* Open roof
-* Close roof
-* Stop roof movement
+Open roof
 
----
+Close roof
 
-### Power Management
+Stop roof movement
+
+Power Management
 
 Displays power usage statistics and system performance.
 
 Provides insight into energy consumption across stadium infrastructure.
 
----
-
-# Data Flow
-
-```mermaid
+Data Flow
 flowchart LR
   A[Android App] -->|Send Command| B[FastAPI Service]
   B -->|Execute Control| C[Raspberry Pi]
@@ -146,43 +134,40 @@ flowchart LR
   D -->|Sensor Data| C
   C -->|Telemetry| E[InfluxDB]
   A -->|Query Data| E
-```
+Technology Stack
+Programming Languages
 
----
+Kotlin
 
-# Technology Stack
+Python
 
-### Programming Languages
+Mobile Development
 
-* Kotlin
-* Python
+Android SDK
 
-### Mobile Development
+Material UI Components
 
-* Android SDK
-* Material UI Components
-* Kotlin Coroutines
+Kotlin Coroutines
 
-### Backend
+Backend
 
-* FastAPI
-* REST APIs
+FastAPI
 
-### IoT Infrastructure
+REST APIs
 
-* Raspberry Pi
-* Sensor devices
-* Local control services
+IoT Infrastructure
 
-### Data Monitoring
+Raspberry Pi
 
-* InfluxDB time-series database
+Sensor devices
 
----
+Local control services
 
-# Project Structure
+Data Monitoring
 
-```text
+InfluxDB time-series database
+
+Project Structure
 SmartStadium
 │
 ├── android-app
@@ -199,50 +184,46 @@ SmartStadium
 │   └── sensor-data pipeline
 │
 └── README.md
-```
+Requirements
 
----
+Android Studio
 
-# Requirements
+Kotlin
 
-* Android Studio
-* Kotlin
-* Raspberry Pi environment
-* Python (FastAPI)
-* InfluxDB
+Raspberry Pi environment
 
----
+Python (FastAPI)
 
-# Quick Start
+InfluxDB
+
+Quick Start
 
 Clone the repository:
 
-```bash
 git clone https://github.com/Martinmd79/SmartStadium.git
 cd SmartStadium
-```
 
-Open the Android project in **Android Studio** and run on a device or emulator.
+Open the Android project in Android Studio and run on a device or emulator.
 
 Ensure the backend services and telemetry database are running before launching the application.
 
----
-
-# Future Improvements
+Future Improvements
 
 Potential extensions of the system include:
 
-* AI-based crowd monitoring using computer vision
-* Real-time analytics dashboard
-* Cloud-based deployment
-* Predictive maintenance using sensor data
-* Role-based access control for operators
+AI-based crowd monitoring using computer vision
 
----
+Real-time analytics dashboard
 
-# Author
+Cloud-based deployment
 
-**Martin Degani**
+Predictive maintenance using sensor data
+
+Role-based access control for operators
+
+Author
+
+Martin Degani
 Software Engineering Student — Swinburne University
 
 GitHub
@@ -250,6 +231,3 @@ https://github.com/Martinmd79
 
 LinkedIn
 https://linkedin.com/in/martin-degani
-
-```
-```
