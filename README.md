@@ -60,7 +60,7 @@ This project demonstrates a full-stack architecture combining **mobile developme
 
 The system follows a **three-layer architecture** connecting mobile applications, backend services, and IoT devices.
 
-
+```mermaid
 flowchart LR
   A[Android Mobile App]
   B[FastAPI Backend Services]
@@ -73,59 +73,70 @@ flowchart LR
   C --> D
   C --> E
   A -->|Telemetry Query| E
-Architecture Components
-Layer	Responsibility
-Mobile App	Control interface for stadium operators
-Backend API	Handles control commands and system logic
-IoT Gateway	Communicates with sensors and devices
-Database	Stores telemetry and environmental data
-Application Modules
+```
+
+### Architecture Components
+
+| Layer       | Responsibility                            |
+| ----------- | ----------------------------------------- |
+| Mobile App  | Control interface for stadium operators   |
+| Backend API | Handles control commands and system logic |
+| IoT Gateway | Communicates with sensors and devices     |
+| Database    | Stores telemetry and environmental data   |
+
+---
+
+# Application Modules
 
 The Android application is divided into modules representing different stadium systems.
 
-Field Sensors
+### Field Sensors
 
 Displays telemetry from environmental sensors deployed around the stadium.
 
 Examples:
 
-Temperature monitoring
+* Temperature monitoring
+* Humidity monitoring
+* Light sensor readings
 
-Humidity monitoring
+---
 
-Light sensor readings
-
-Lighting Control
+### Lighting Control
 
 Allows operators to remotely manage stadium lighting.
 
 Functions include:
 
-Turning lights on/off
+* Turning lights on/off
+* Managing lighting zones
+* Monitoring system status
 
-Managing lighting zones
+---
 
-Monitoring system status
-
-Mechanical Roof Control
+### Mechanical Roof Control
 
 Controls the stadium roof system.
 
 Operators can:
 
-Open roof
+* Open roof
+* Close roof
+* Stop roof movement
 
-Close roof
+---
 
-Stop roof movement
-
-Power Management
+### Power Management
 
 Displays power usage statistics and system performance.
 
 Provides insight into energy consumption across stadium infrastructure.
 
-Data Flow
+---
+
+# Data Flow
+
+```mermaid
 flowchart LR
   A[Android App] -->|Send Command| B[FastAPI Service]
   B -->|Execute Control| C[Raspberry Pi]
@@ -134,40 +145,43 @@ flowchart LR
   D -->|Sensor Data| C
   C -->|Telemetry| E[InfluxDB]
   A -->|Query Data| E
-Technology Stack
-Programming Languages
+```
 
-Kotlin
+---
 
-Python
+# Technology Stack
 
-Mobile Development
+### Programming Languages
 
-Android SDK
+* Kotlin
+* Python
 
-Material UI Components
+### Mobile Development
 
-Kotlin Coroutines
+* Android SDK
+* Material UI Components
+* Kotlin Coroutines
 
-Backend
+### Backend
 
-FastAPI
+* FastAPI
+* REST APIs
 
-REST APIs
+### IoT Infrastructure
 
-IoT Infrastructure
+* Raspberry Pi
+* Sensor devices
+* Local control services
 
-Raspberry Pi
+### Data Monitoring
 
-Sensor devices
+* InfluxDB time-series database
 
-Local control services
+---
 
-Data Monitoring
+# Project Structure
 
-InfluxDB time-series database
-
-Project Structure
+```text
 SmartStadium
 │
 ├── android-app
@@ -184,46 +198,50 @@ SmartStadium
 │   └── sensor-data pipeline
 │
 └── README.md
-Requirements
+```
 
-Android Studio
+---
 
-Kotlin
+# Requirements
 
-Raspberry Pi environment
+* Android Studio
+* Kotlin
+* Raspberry Pi environment
+* Python (FastAPI)
+* InfluxDB
 
-Python (FastAPI)
+---
 
-InfluxDB
-
-Quick Start
+# Quick Start
 
 Clone the repository:
 
+```bash
 git clone https://github.com/Martinmd79/SmartStadium.git
 cd SmartStadium
+```
 
-Open the Android project in Android Studio and run on a device or emulator.
+Open the Android project in **Android Studio** and run on a device or emulator.
 
 Ensure the backend services and telemetry database are running before launching the application.
 
-Future Improvements
+---
+
+# Future Improvements
 
 Potential extensions of the system include:
 
-AI-based crowd monitoring using computer vision
+* AI-based crowd monitoring using computer vision
+* Real-time analytics dashboard
+* Cloud-based deployment
+* Predictive maintenance using sensor data
+* Role-based access control for operators
 
-Real-time analytics dashboard
+---
 
-Cloud-based deployment
+# Author
 
-Predictive maintenance using sensor data
-
-Role-based access control for operators
-
-Author
-
-Martin Degani
+**Martin Degani**
 Software Engineering Student — Swinburne University
 
 GitHub
